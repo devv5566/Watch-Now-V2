@@ -1,0 +1,7 @@
+2026-04-21T10:30:33.537Z [32minfo[39m undefined:     Add-on Repository URL: http://127.0.0.1:51546/manifest.json
+2026-04-21T10:30:35.239Z [32minfo[39m 6a026649-8a14-4c77-92fa-c01c3886ddcd:     Search stream for type "movie" and id "tmdb:533535" for ip ::ffff:127.0.0.1
+2026-04-21T10:30:35.246Z [32minfo[39m 6a026649-8a14-4c77-92fa-c01c3886ddcd:     Fetch GET https://api.themoviedb.org/3/movie/533535
+2026-04-21T10:30:35.291Z [32minfo[39m 6a026649-8a14-4c77-92fa-c01c3886ddcd:     Fetch GET https://api.themoviedb.org/3/movie/533535/external_ids
+2026-04-21T10:30:39.086Z [32minfo[39m 6a026649-8a14-4c77-92fa-c01c3886ddcd:     Got 401 (Unauthorized) for https://api.themoviedb.org/3/movie/533535/external_ids
+2026-04-21T10:30:39.105Z [32minfo[39m 6a026649-8a14-4c77-92fa-c01c3886ddcd:     Got 401 (Unauthorized) for https://api.themoviedb.org/3/movie/533535
+2026-04-21T10:30:39.106Z [32minfo[39m 6a026649-8a14-4c77-92fa-c01c3886ddcd:     Got 11 url results, including 2 errors

@@ -34,6 +34,10 @@ export const createExtractors = (fetcher: Fetcher): Extractor[] => {
   const hubCloud = new HubCloud(fetcher);
 
   return [
+    // HubCloud/HubDrive MUST come before Direct, otherwise Direct's catch-all
+    // supports() swallows hubcloud URLs before HubCloud extractor can handle them.
+    hubCloud,
+    new HubDrive(fetcher, hubCloud),
     new Direct(fetcher),
     new DoodStream(fetcher),
     new Dropload(fetcher),
@@ -41,8 +45,6 @@ export const createExtractors = (fetcher: Fetcher): Extractor[] => {
     new FileLions(fetcher),
     new FileMoon(fetcher),
     new Fsst(fetcher),
-    hubCloud,
-    new HubDrive(fetcher, hubCloud),
     new KinoGer(fetcher),
     new LuluStream(fetcher),
     new Mixdrop(fetcher),

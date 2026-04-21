@@ -41,7 +41,7 @@ export class HubCloud extends Extractor {
           const url = new URL($(el).attr('href') as string);
           return {
             url,
-            format: Format.unknown,
+            format: Format.mp4, // FSL serves video files as application/octet-stream; mp4 tells Stremio to treat it as video
             label: `${this.label} (FSL)`,
             meta: {
               ...meta,
@@ -63,7 +63,7 @@ export class HubCloud extends Extractor {
           const url = new URL($(el).attr('href') as string);
           return {
             url,
-            format: Format.unknown,
+            format: Format.mp4, // FSLv2 also serves video files
             label: `${this.label} (FSLv2)`,
             meta: {
               ...meta,
