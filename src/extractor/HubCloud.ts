@@ -42,6 +42,7 @@ export class HubCloud extends Extractor {
           return {
             url,
             format: Format.unknown,
+            isExternal: true,
             label: `${this.label} (FSL)`,
             meta: {
               ...meta,
@@ -64,6 +65,7 @@ export class HubCloud extends Extractor {
           return {
             url,
             format: Format.unknown,
+            isExternal: true,
             label: `${this.label} (FSLv2)`,
             meta: {
               ...meta,
@@ -85,6 +87,7 @@ export class HubCloud extends Extractor {
           return {
             url,
             format: Format.unknown,
+            isExternal: true,
             label: `${this.label} (PixelServer)`,
             meta: {
               ...meta,

@@ -4,7 +4,7 @@ import { Fetcher, getTmdbId, Id } from '../utils';
 import { Source, SourceResult } from './Source';
 
 export class Showbox extends Source {
-  public readonly id = 'showbox';
+  public readonly id = 'showbox_v2';
 
   public readonly label = 'Showbox';
 
