@@ -22,8 +22,12 @@ export class Showbox extends Source {
   }
 
   public async handleInternal(ctx: Context, _type: ContentType, id: Id): Promise<SourceResult[]> {
-    if (!ctx.config.febboxCookie) {
+    let cookie = ctx.config.febboxCookie?.trim();
+    if (!cookie) {
       return [];
+    }
+    if (!cookie.startsWith('ui=')) {
+      cookie = 'ui=' + cookie;
     }
 
     const tmdbId = await getTmdbId(ctx, this.fetcher, id);
@@ -32,9 +36,9 @@ export class Showbox extends Source {
     const oss = 'USA7'; // default OSS
 
     if (tmdbId.season) {
-      apiUrl = `${this.baseUrl}/tv/${tmdbId.id}/oss=${oss}/${tmdbId.season}/${tmdbId.episode}?cookie=${encodeURIComponent(ctx.config.febboxCookie)}`;
+      apiUrl = `${this.baseUrl}/tv/${tmdbId.id}/oss=${oss}/${tmdbId.season}/${tmdbId.episode}?cookie=${encodeURIComponent(cookie)}`;
     } else {
-      apiUrl = `${this.baseUrl}/movie/${tmdbId.id}/oss=${oss}?cookie=${encodeURIComponent(ctx.config.febboxCookie)}`;
+      apiUrl = `${this.baseUrl}/movie/${tmdbId.id}/oss=${oss}?cookie=${encodeURIComponent(cookie)}`;
     }
 
     try {

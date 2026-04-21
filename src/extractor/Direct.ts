@@ -26,10 +26,14 @@ export class Direct extends Extractor {
   }
 
   protected async extractInternal(_ctx: Context, url: URL, meta: Meta): Promise<InternalUrlResult[]> {
+    let format = Format.unknown;
+    if (url.pathname.match(/\.(m3u8)$/i)) format = Format.hls;
+    else if (url.pathname.match(/\.(mp4|mkv|avi)$/i) || url.pathname.match(/movie\.\d+\.\d+\.original/i)) format = Format.mp4;
+
     return [
       {
         url,
-        format: Format.unknown,
+        format,
         isExternal: false,
         label: meta.sourceLabel || this.label,
         meta,
