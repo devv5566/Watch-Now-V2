@@ -518,6 +518,11 @@ export function landingTemplate(manifest: CustomManifest) {
 
     updateLink();
     if (form) form.addEventListener('change', updateLink);
+
+    // silently track install clicks
+    installLink.addEventListener('click', function() {
+      fetch('/track-install', { method: 'POST' }).catch(function(){});
+    });
   })();
 </script>
 </body>

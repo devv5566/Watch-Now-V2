@@ -15,6 +15,8 @@ import { HDHub4u } from './source/HDHub4u';
 import { Showbox } from './source/Showbox';
 import { clearCache, contextFromRequestAndResponse, envGet, envIsProd, Fetcher, StreamResolver } from './utils';
 import { LOGO_BLUE } from './logo';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 if (envIsProd()) {
   console.log = console.warn = console.error = console.info = console.debug = () => { /* disable in favor of logger */ };
@@ -93,6 +95,44 @@ addon.get('/logo.png', (_req: Request, res: Response) => {
 });
 
 addon.use(express.static('src'));
+
+// ── Install click counter ──────────────────────────────────────────────────
+const STATS_FILE = path.join(process.cwd(), 'install-stats.json');
+
+function readStats(): { installs: number; lastInstall: string | null } {
+  try {
+    return JSON.parse(fs.readFileSync(STATS_FILE, 'utf8'));
+  } catch {
+    return { installs: 0, lastInstall: null };
+  }
+}
+
+function writeStats(data: { installs: number; lastInstall: string | null }) {
+  try { fs.writeFileSync(STATS_FILE, JSON.stringify(data, null, 2), 'utf8'); } catch { /* ignore */ }
+}
+
+addon.post('/track-install', (_req: Request, res: Response) => {
+  const stats = readStats();
+  stats.installs += 1;
+  stats.lastInstall = new Date().toISOString();
+  writeStats(stats);
+  res.json({ ok: true });
+});
+
+// Private stats — only accessible with ?key=YOUR_ADMIN_KEY
+addon.get('/admin/stats', (req: Request, res: Response) => {
+  const adminKey = envGet('ADMIN_KEY') || 'watchnow-secret-2024';
+  if (req.query['key'] !== adminKey) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const stats = readStats();
+  return res.json({
+    totalInstalls: stats.installs,
+    lastInstall: stats.lastInstall,
+    note: 'Count increments each time someone clicks Add to Stremio',
+  });
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 addon.use('/', (new ExtractController(logger, fetcher, extractorRegistry)).router);
 addon.use('/', (new ConfigureController(sources, extractors)).router);
