@@ -8,7 +8,7 @@ import { flagFromCountryCode, languageFromCountryCode } from './language';
 const typedEntries = <T extends object>(obj: T): [keyof T, T[keyof T]][] => (Object.entries(obj) as [keyof T, T[keyof T]][]);
 
 export const buildManifest = (sources: Source[], extractors: Extractor[], config: Config): CustomManifest => {
-  const logoUrl = `${process.env['PROTOCOL'] || 'http'}://${process.env['HOST'] || 'localhost:51546'}/2.png`;
+  const logoUrl = `${process.env['PROTOCOL'] || 'http'}://${process.env['HOST'] || 'localhost:51546'}/logo.png`;
 
   const manifest: CustomManifest = {
     id: envGetAppId(),

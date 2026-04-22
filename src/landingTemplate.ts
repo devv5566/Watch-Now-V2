@@ -1,9 +1,11 @@
 // Adapted version of https://github.com/Stremio/stremio-addon-sdk/blob/v1.6.2/src/landingTemplate.js
 import { CustomManifest } from './types';
 import { envGet } from './utils';
+import { LOGO_BLUE } from './logo';
 
 export function landingTemplate(manifest: CustomManifest) {
-  const logoUrl = manifest.logo || '/2.png';
+  // Always use inlined base64 logo for <img> tags — works on any host
+  const inlineLogo = LOGO_BLUE;
 
   // Build config form — only language checkboxes remain
   let formFields = '';
@@ -50,9 +52,9 @@ export function landingTemplate(manifest: CustomManifest) {
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>WatchNow – Stremio Add-on</title>
   <meta name="description" content="WatchNow Stremio Add-on – stream Movies &amp; Series in 4K, 1080p and more. Powered by DevStreams."/>
-  <link rel="icon" type="image/png" href="${logoUrl}"/>
-  <link rel="apple-touch-icon" href="${logoUrl}"/>
-  <link rel="shortcut icon" href="${logoUrl}"/>
+  <link rel="icon" type="image/png" href="${inlineLogo}"/>
+  <link rel="apple-touch-icon" href="${inlineLogo}"/>
+  <link rel="shortcut icon" href="${inlineLogo}"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
@@ -328,7 +330,7 @@ export function landingTemplate(manifest: CustomManifest) {
 
   <!-- HERO -->
   <div class="hero">
-    <img src="${logoUrl}" alt="WatchNow Logo" class="hero-logo"/>
+    <img src="${inlineLogo}" alt="WatchNow Logo" class="hero-logo"/>
     <h1 class="hero-title">WatchNow</h1>
     <p class="hero-sub">A premium Stremio add-on delivering Movies &amp; Series streams with rich quality metadata.</p>
     <div class="badge-row">
@@ -406,7 +408,7 @@ export function landingTemplate(manifest: CustomManifest) {
   <div class="install-btn-wrap">
     <a id="installLink" class="install-link" href="#">
       <button class="install-btn" name="Install">
-        <img src="${logoUrl}" alt="" class="btn-logo"/>
+        <img src="${inlineLogo}" alt="" class="btn-logo"/>
         Add to Stremio
       </button>
     </a>

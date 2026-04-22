@@ -14,6 +14,7 @@ import { FourKHDHub } from './source/FourKHDHub';
 import { HDHub4u } from './source/HDHub4u';
 import { Showbox } from './source/Showbox';
 import { clearCache, contextFromRequestAndResponse, envGet, envIsProd, Fetcher, StreamResolver } from './utils';
+import { LOGO_BLUE } from './logo';
 
 if (envIsProd()) {
   console.log = console.warn = console.error = console.info = console.debug = () => { /* disable in favor of logger */ };
@@ -81,6 +82,15 @@ addon.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 const extractorRegistry = new ExtractorRegistry(logger, extractors);
+
+// Serve the WatchNow logo as a real PNG (accessible by Stremio and browsers)
+addon.get('/logo.png', (_req: Request, res: Response) => {
+  const base64Data = LOGO_BLUE.replace('data:image/png;base64,', '');
+  const imgBuffer = Buffer.from(base64Data, 'base64');
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(imgBuffer);
+});
 
 addon.use(express.static('src'));
 
