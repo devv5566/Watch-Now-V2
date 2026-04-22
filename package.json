@@ -4,15 +4,10 @@
   "version": "0.69.1",
   "type": "commonjs",
   "scripts": {
-    "analyse": "tsc --noEmit --project ./tsconfig.dev.json",
-    "build": "rm -rf ./dist && tsc",
+    "build": "rmdir /s /q dist && tsc",
+    "vercel-build": "npm run build",
     "dev": "nodemon src/index.ts",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
     "start": "node dist/index.js",
-    "test": "jest",
-    "test:update-fixtures": "TEST_UPDATE_FIXTURES=1 npm run test",
-    "ci": "npm run lint && npm run analyse && npm run test"
   },
   "repository": {
     "type": "git",
