@@ -44,7 +44,7 @@ export class StreamController {
 
     this.logger.info(`Search stream for type "${type}" and id "${rawId}" for ip ${ctx.ip}`, ctx);
 
-    const sources = this.sources.filter(source => source.countryCodes.filter(countryCode => countryCode in ctx.config).length);
+    const sources = this.sources; // include all sources (Showbox uses 'multi')
 
     let mutex = this.locks.get(rawId);
     if (!mutex) {

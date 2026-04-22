@@ -13,5 +13,5 @@ export const createSources = (fetcher: Fetcher): Source[] => {
     new FourKHDHub(fetcher),
     new HDHub4u(fetcher),
     new Showbox(fetcher),
-  ].filter(source => !disabledSources.includes(source.id));
+  ];
 };
