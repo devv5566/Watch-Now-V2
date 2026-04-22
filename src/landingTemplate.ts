@@ -323,10 +323,43 @@ export function landingTemplate(manifest: CustomManifest) {
     }
 
     .powered-by a:hover { color: #fff; }
+
+    /* ── left sidebar tab ── */
+    .side-tab {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      transform-origin: left center;
+      z-index: 100;
+      background: var(--blue);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 2px 2px 12px var(--blue-glow);
+      white-space: nowrap;
+      transition: background 0.2s, box-shadow 0.2s;
+      margin-left: -1px;
+    }
+
+    .side-tab:hover {
+      background: var(--blue-light);
+      box-shadow: 2px 2px 20px rgba(59,130,246,0.5);
+    }
   </style>
 </head>
 <body>
 <div class="page">
+
+  <!-- LEFT SIDE TAB -->
+  <a href="https://dev-streamz-navy.vercel.app/configure" target="_blank" rel="noopener" class="side-tab"
+     title="More Addons by DevStreamz">More Addons by DevStreamz</a>
 
   <!-- HERO -->
   <div class="hero">
@@ -417,7 +450,7 @@ export function landingTemplate(manifest: CustomManifest) {
   <!-- POWERED BY -->
   <div class="powered-by">
     <span>Powered by <a href="https://dev-streamz-navy.vercel.app/configure" target="_blank" rel="noopener">DevStreams</a></span>
-    <span>v${manifest.version || '1.14.0'}</span>
+    <span>v${manifest.version || '1.14.0'} &nbsp;·&nbsp; <a href="https://dev-streamz-navy.vercel.app/configure" target="_blank" rel="noopener">More Addons by DevStreamz →</a></span>
   </div>
 
 </div>
