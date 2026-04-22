@@ -34,7 +34,7 @@ export const buildManifest = (sources: Source[], extractors: Extractor[], config
     config: [],
     stremioAddonsConfig: {
       issuer: 'https://stremio-addons.net',
-      signature: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..D3-Wl15vxnYltwx8G52rRg.16-0VzsSgTvnv0wampIR8YPZsFhH8-7IgpuqxcUfC2p7kIJtuk8xQzrzqQOLXANEpaH_w7a4JOEpNo8wv28Zo_nMGCLOXgWbyGM3sQ-tfq6DCK3JU0ol6YMC1UDX2z_c.IOLlZyTYx_swutjYSTES0Q',
+      signature: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..rKjOmayBES1KlMBU1Y4JrQ.A9Ju0arqxDfKUA3yjPQaZoW7QYkSsz3eIIgzt0WbgEZI3dVh4okFx_1HamuBXhLUdfK6XuEv1ku_Uk9lvkzTy60JGEbuuKs_oJlMf0ujwOZiyH38sW5-cwqgQar084oi.och-mhI56QTNsP1Y4M4H3w',
     },
   };
 
