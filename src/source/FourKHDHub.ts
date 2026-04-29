@@ -68,32 +68,75 @@ export class FourKHDHub extends Source {
   };
 
   private readonly fetchPageUrl = async (ctx: Context, tmdbId: TmdbId): Promise<URL | undefined> => {
-    const [name, year] = await getTmdbNameAndYear(ctx, this.fetcher, tmdbId);
+    try {
+      const [name, year] = await getTmdbNameAndYear(ctx, this.fetcher, tmdbId);
 
-    const searchUrl = new URL(`/?s=${encodeURIComponent(name)}`, await this.getBaseUrl(ctx));
-    const html = await this.fetcher.text(ctx, searchUrl);
+      const searchUrl = new URL(`/?s=${encodeURIComponent(name)}`, await this.getBaseUrl(ctx));
+      const html = await this.fetcher.text(ctx, searchUrl);
 
-    const $ = cheerio.load(html);
+      const $ = cheerio.load(html);
 
-    return $(`.movie-card:has(.movie-card-format:contains("${tmdbId.season ? 'Series' : 'Movies'}"))`)
-      .filter((_i, el) => {
-        const movieCardYear = parseInt($('.movie-card-meta', el).text());
+      const results = $(`.movie-card:has(.movie-card-format:contains("${tmdbId.season ? 'Series' : 'Movies'}"))`)
+        .filter((_i, el) => {
+          const movieCardYear = parseInt($('.movie-card-meta', el).text());
 
-        return Math.abs(movieCardYear - year) <= 1;
-      })
-      .filter((_i, el) => {
-        const movieCardTitle = $('.movie-card-title', el)
-          .text()
-          .replace(/\[.*?]/, '')
-          .trim();
+          // Be more lenient with year matching (±2 years instead of ±1)
+          return Math.abs(movieCardYear - year) <= 2;
+        })
+        .filter((_i, el) => {
+          const movieCardTitle = $('.movie-card-title', el)
+            .text()
+            .replace(/\[.*?]/, '')
+            .trim();
 
-        const diff = levenshtein.get(movieCardTitle, name, { useCollator: true });
+          // If we can't get a title, skip this result
+          if (!movieCardTitle) {
+            return false;
+          }
 
-        return diff < 5
-          || (movieCardTitle.includes(name) && diff < 16);
-      })
-      .map(async (_i, el) => new URL($(el).attr('href') as string, await this.getBaseUrl(ctx)))
-      .get(0);
+          const diff = levenshtein.get(movieCardTitle, name, { useCollator: true });
+
+          // Be more lenient with title matching
+          return diff < 8
+            || (movieCardTitle.toLowerCase().includes(name.toLowerCase()) && diff < 20);
+        })
+        .map(async (_i, el) => {
+          const href = $(el).attr('href');
+          if (!href) {
+            return undefined;
+          }
+          try {
+            return new URL(href, await this.getBaseUrl(ctx));
+          } catch (e) {
+            this.logger?.warn(`Invalid URL in 4KHDHub search result: ${href}`, ctx);
+            return undefined;
+          }
+        })
+        .get(0);
+
+      // If we didn't find a good match with strict criteria, try a broader search
+      if (!results) {
+        return $(`.movie-card:has(.movie-card-format:contains("${tmdbId.season ? 'Series' : 'Movies'}"))`)
+          .map(async (_i, el) => {
+            const href = $(el).attr('href');
+            if (!href) {
+              return undefined;
+            }
+            try {
+              return new URL(href, await this.getBaseUrl(ctx));
+            } catch (e) {
+              this.logger?.warn(`Invalid URL in 4KHDHub search result (fallback): ${href}`, ctx);
+              return undefined;
+            }
+          })
+          .get(0);
+      }
+
+      return results;
+    } catch (error) {
+      this.logger?.warn(`Error in 4KHDHub fetchPageUrl: ${error}`, ctx);
+      return undefined;
+    }
   };
 
   private readonly extractSourceResults = async (ctx: Context, $: CheerioAPI, el: BasicAcceptedElems<AnyNode>, countryCodes: CountryCode[]): Promise<SourceResult> => {

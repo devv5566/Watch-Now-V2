@@ -114,3 +114,5 @@ Free Webshare proxies seem to work with it.
 #### `TMDB_ACCESS_TOKEN`
 
 **Required**. TMDB access token to get information like title and year for content. Use the [API Read Access Token](https://www.themoviedb.org/settings/api).
+
+# Watch-Now-V2
