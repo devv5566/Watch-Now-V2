@@ -108,7 +108,7 @@ export class FourKHDHub extends Source {
           try {
             return new URL(href, await this.getBaseUrl(ctx));
           } catch (e) {
-            this.logger?.warn(`Invalid URL in 4KHDHub search result: ${href}`, ctx);
+            console.warn(`Invalid URL in 4KHDHub search result: ${href}`, ctx);
             return undefined;
           }
         })
@@ -125,7 +125,7 @@ export class FourKHDHub extends Source {
             try {
               return new URL(href, await this.getBaseUrl(ctx));
             } catch (e) {
-              this.logger?.warn(`Invalid URL in 4KHDHub search result (fallback): ${href}`, ctx);
+              console.warn(`Invalid URL in 4KHDHub search result (fallback): ${href}`, ctx);
               return undefined;
             }
           })
@@ -134,7 +134,7 @@ export class FourKHDHub extends Source {
 
       return results;
     } catch (error) {
-      this.logger?.warn(`Error in 4KHDHub fetchPageUrl: ${error}`, ctx);
+      console.warn(`Error in 4KHDHub fetchPageUrl: ${error}`, ctx);
       return undefined;
     }
   };

@@ -15,13 +15,7 @@ interface KMMoviesSearchResponse {
   };
 }
 
-interface KMMoviesMoviePage {
-  qualities: Array<{
-    label: string; // e.g., "4K", "1080p", "720p"
-    url: string;   // skydrop URL or direct link
-    type: 'watch' | 'download';
-  }>;
-}
+
 
 export class KMMovies extends Source {
   public readonly id = 'kmmovies';
@@ -58,11 +52,11 @@ export class KMMovies extends Source {
     try {
       // Try to search via a potential search endpoint
       const searchUrl = new URL(`/api/search?imdb=${encodeURIComponent(imdbId)}`, this.baseUrl);
-      const searchResponse = await this.fetcher.json<KMMoviesSearchResponse>(ctx, searchUrl, {
+      const searchResponse = (await this.fetcher.json(ctx, searchUrl, {
         headers: { Referer: this.baseUrl },
-      });
+      })) as KMMoviesSearchResponse | undefined;
 
-      if (searchResponse.data && searchResponse.data.movies && searchResponse.data.movies.length > 0) {
+      if (searchResponse && searchResponse.data && searchResponse.data.movies && searchResponse.data.movies[0]) {
         // Return the first matching movie's URL
         return searchResponse.data.movies[0].url;
       }
@@ -74,12 +68,16 @@ export class KMMovies extends Source {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
       });
 
+      if (!googleResponse) {
+        return null;
+      }
+
       const $ = cheerio.load(googleResponse);
       const firstLink = $('a').first().attr('href');
-      if (firstLink && firstLink.includes(this.baseUrl)) {
+      if (typeof firstLink === 'string' && firstLink.includes(this.baseUrl)) {
         // Extract the actual URL from Google's redirect
         const urlMatch = firstMatch(/url\?q=([^&]+)/, firstLink);
-        if (urlMatch) {
+        if (urlMatch && urlMatch[1]) {
           return decodeURIComponent(urlMatch[1]);
         }
       }
@@ -107,13 +105,6 @@ export class KMMovies extends Source {
 
         const url = $(element).attr('href') || $(element).data('url');
         if (!url) return;
-
-        // Determine if it's a watch or download link
-        const isDownload = $(element).hasClass('download') || 
-                          $(element).text().toLowerCase().includes('download') ||
-                          $(element).attr('data-type') === 'download';
-
-        const type: 'watch' | 'download' = isDownload ? 'download' : 'watch';
 
         // Create meta information
         const meta: Meta = {
