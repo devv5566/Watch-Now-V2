@@ -85,37 +85,64 @@ export class MoviesDrives extends Source {
   ): Promise<URL | null> => {
     try {
       const [name, year] = await getTmdbNameAndYear(ctx, this.fetcher, tmdbId);
+      
+      // If it's a series, include the season in the query for better accuracy
+      let query = name;
+      if (tmdbId.season) {
+        query += ` Season ${tmdbId.season}`;
+      }
 
-      // The search page uses JavaScript rendering but we can search via URL
-      const searchUrl = new URL(`/?s=${encodeURIComponent(name)}`, this.baseUrl);
-      const html = await this.fetcher.text(ctx, searchUrl, {
+      // The search page uses JavaScript rendering, but we discovered a JSON API
+      const searchUrl = new URL(`/searchapi.php?q=${encodeURIComponent(query)}&page=1`, this.baseUrl);
+      const data = await this.fetcher.json(ctx, searchUrl, {
         headers: { Referer: this.baseUrl },
-      });
+      }) as any;
 
-      const $ = cheerio.load(html);
+      if (!data || !data.hits || data.hits.length === 0) {
+        // Fallback search without season if needed
+        if (tmdbId.season) {
+          const fallbackUrl = new URL(`/searchapi.php?q=${encodeURIComponent(name)}&page=1`, this.baseUrl);
+          const fallbackData = await this.fetcher.json(ctx, fallbackUrl, {
+            headers: { Referer: this.baseUrl },
+          }) as any;
+          if (fallbackData && fallbackData.hits && fallbackData.hits.length > 0) {
+            data.hits = fallbackData.hits;
+          } else {
+            return null;
+          }
+        } else {
+          return null;
+        }
+      }
 
-      // Find article links - each post is an <a> or article with a href
-      // Pattern: <a href="https://new2.moviesdrives.my/SLUG/">Title (YEAR)</a>
-      const candidates: Array<{ url: URL; title: string; year: number }> = [];
-
-      $('article a[href], h2 a[href], h3 a[href], .entry-title a[href]').each((_i, el) => {
-        const href = $(el).attr('href') ?? '';
-        const text = $(el).text().trim();
-        if (!href.includes(this.baseUrl) && !href.startsWith('/')) return;
-        if (href.includes('/category/') || href.includes('/tag/') || href.includes('/?s=')) return;
-
+      // Map API results to candidates
+      const candidates = data.hits.map((hit: any) => {
+        const doc = hit.document;
+        const text = doc.post_title;
         const yearMatch = text.match(/\((\d{4})\)/);
         const cardYear = yearMatch && yearMatch[1] ? parseInt(yearMatch[1]) : 0;
-
-        try {
-          candidates.push({ url: new URL(href, this.baseUrl), title: text, year: cardYear });
-        } catch (_) { /* ignore bad URLs */ }
+        return {
+          url: new URL(doc.permalink, this.baseUrl),
+          title: text,
+          year: cardYear
+        };
       });
 
       // Score candidates: year match + levenshtein on title
       const scored = candidates
-        .filter(c => c.year === 0 || Math.abs(c.year - year) <= 2)
-        .map(c => ({
+        .filter((c: any) => {
+          // For series, ensure the season is mentioned in the title if we have it
+          if (tmdbId.season) {
+            const seasonStr = `Season ${tmdbId.season}`;
+            const sStr = `S${tmdbId.season}`;
+            const sStrPad = `S${String(tmdbId.season).padStart(2, '0')}`;
+            if (!c.title.includes(seasonStr) && !c.title.includes(sStr) && !c.title.includes(sStrPad)) {
+              return false;
+            }
+          }
+          return c.year === 0 || Math.abs(c.year - year) <= 2;
+        })
+        .map((c: any) => ({
           ...c,
           score: levenshtein.get(
             c.title.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim().toLowerCase(),
@@ -123,23 +150,15 @@ export class MoviesDrives extends Source {
             { useCollator: true },
           ),
         }))
-        .sort((a, b) => a.score - b.score);
+        .sort((a: any, b: any) => a.score - b.score);
 
       if (scored[0]) {
         return scored[0].url;
       }
 
-      // Fallback: try constructing URL from IMDB slug search in page links
-      const allLinks = $('a[href]')
-        .map((_i, el) => $(el).attr('href') ?? '')
-        .toArray()
-        .filter(href => href.includes('moviesdrives') && !href.includes('/category/') && !href.includes('/tag/'));
-
-      // Return first non-homepage link as broad fallback
-      const fallbackHref = allLinks.find(h => h !== this.baseUrl + '/' && h.length > this.baseUrl.length + 5);
-      return fallbackHref ? new URL(fallbackHref, this.baseUrl) : null;
-    } catch (e) {
-      console.warn(`[MoviesDrives] Error finding movie page: ${e}`);
+      return null;
+    } catch (e: any) {
+      console.warn(`[MoviesDrives] Error finding movie page: ${e.stack || e}`);
       return null;
     }
   };
