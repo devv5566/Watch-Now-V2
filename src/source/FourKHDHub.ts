@@ -79,36 +79,41 @@ export class FourKHDHub extends Source {
 
       const $ = cheerio.load(html);
 
-      const results = $(`.movie-card:has(.movie-card-format:contains("${tmdbId.season ? 'Series' : 'Movies'}"))`)
+      // New site structure: `a.movie-card` wraps entire card
+      // Title is in `.movie-card-content` (h3/p), year is a <p> inside, format badges are in `.movie-card-formats`
+      const results = $('a.movie-card')
         .filter((_i, el) => {
-          // Year is in .movie-card-year on new site (was .movie-card-meta on old site)
-          const movieCardYear = parseInt($('.movie-card-year, .movie-card-meta', el).text());
+          // Format filter: check if Movies or Series text appears anywhere in the card
+          const formats = $('.movie-card-formats', el).text().replace(/\s+/g, ' ').toLowerCase();
+          const hasCorrectFormat = tmdbId.season
+            ? formats.includes('series')
+            : formats.includes('movies') || formats.includes('movie') || !formats.includes('series');
+          if (!hasCorrectFormat) return false;
 
-          // Be more lenient with year matching (±2 years instead of ±1)
+          // Year: typically the last short text inside .movie-card-content
+          const yearText = $('.movie-card-content p', el).last().text().trim();
+          const movieCardYear = parseInt(yearText);
+
+          // Be more lenient with year matching (±2 years)
           return Math.abs(movieCardYear - year) <= 2;
         })
         .filter((_i, el) => {
-          const movieCardTitle = $('.movie-card-title', el)
-            .text()
-            .replace(/\[.*?]/, '')
+          // Title is in h3 or the main text of .movie-card-content
+          const movieCardTitle = ($('.movie-card-content h3', el).text()
+            || $('.movie-card-content', el).clone().children('p').remove().end().text())
+            .replace(/\[.*?]/g, '')
             .trim();
 
-          // If we can't get a title, skip this result
-          if (!movieCardTitle) {
-            return false;
-          }
+          if (!movieCardTitle) return false;
 
           const diff = levenshtein.get(movieCardTitle, name, { useCollator: true });
 
-          // Be more lenient with title matching
           return diff < 8
             || (movieCardTitle.toLowerCase().includes(name.toLowerCase()) && diff < 20);
         })
         .map(async (_i, el) => {
           const href = $(el).attr('href');
-          if (!href) {
-            return undefined;
-          }
+          if (!href) return undefined;
           try {
             return new URL(href, await this.getBaseUrl(ctx));
           } catch (e) {
