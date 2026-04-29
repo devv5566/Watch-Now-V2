@@ -19,7 +19,7 @@ export class FourKHDHub extends Source {
 
   public readonly countryCodes: CountryCode[] = [CountryCode.multi, CountryCode.hi, CountryCode.ta, CountryCode.te];
 
-  public readonly baseUrl = 'https://4khdhub.dad';
+  public readonly baseUrl = 'https://4khdhub.click';
 
   private readonly fetcher: Fetcher;
 
@@ -44,6 +44,9 @@ export class FourKHDHub extends Source {
 
     const html = await this.fetcher.text(ctx, pageUrl);
     const $ = cheerio.load(html);
+
+    // Unhide all content panels (they are hidden by default, JS expands them)
+    $('[id^="content-file"]').removeClass('hidden');
 
     if (tmdbId.season) {
       return Promise.all(
@@ -78,7 +81,8 @@ export class FourKHDHub extends Source {
 
       const results = $(`.movie-card:has(.movie-card-format:contains("${tmdbId.season ? 'Series' : 'Movies'}"))`)
         .filter((_i, el) => {
-          const movieCardYear = parseInt($('.movie-card-meta', el).text());
+          // Year is in .movie-card-year on new site (was .movie-card-meta on old site)
+          const movieCardYear = parseInt($('.movie-card-year, .movie-card-meta', el).text());
 
           // Be more lenient with year matching (±2 years instead of ±1)
           return Math.abs(movieCardYear - year) <= 2;
@@ -114,9 +118,9 @@ export class FourKHDHub extends Source {
         })
         .get(0);
 
-      // If we didn't find a good match with strict criteria, try a broader search
+      // If we didn't find a good match with strict criteria, try first result of any format
       if (!results) {
-        return $(`.movie-card:has(.movie-card-format:contains("${tmdbId.season ? 'Series' : 'Movies'}"))`)
+        return $('a.movie-card')
           .map(async (_i, el) => {
             const href = $(el).attr('href');
             if (!href) {
@@ -140,20 +144,27 @@ export class FourKHDHub extends Source {
   };
 
   private readonly extractSourceResults = async (ctx: Context, $: CheerioAPI, el: BasicAcceptedElems<AnyNode>, countryCodes: CountryCode[]): Promise<SourceResult> => {
-    const localHtml = $(el).html() as string;
+    // The hidden content panel is in the sibling div with id="content-{data-file-id}"
+    const fileId = $('.download-header', el).attr('data-file-id');
+    const contentEl = fileId ? $(`#content-${fileId}`) : $(el);
+    const targetEl = contentEl.length ? contentEl : $(el);
+
+    const localHtml = ($(el).html() ?? '') + (targetEl.html() ?? '');
 
     const sizeMatch = localHtml.match(/([\d.]+ ?[GM]B)/);
-    const heightMatch = localHtml.match(/\d{3,}p/) as string[];
+    const heightMatch = localHtml.match(/\d{3,}p/) as string[] | null;
 
     const meta: Meta = {
       countryCodes: [...new Set([...countryCodes, ...findCountryCodes(localHtml)])],
-      height: parseInt(heightMatch[0] as string),
-      title: $('.file-title, .episode-file-title', el).text().trim(),
+      ...(heightMatch && heightMatch[0] && { height: parseInt(heightMatch[0]) }),
+      title: $('.file-title, .episode-file-title', targetEl).text().trim()
+        || $('.download-header .flex-1', el).clone().children('code').remove().end().text().trim(),
       ...(sizeMatch && { bytes: bytes.parse(sizeMatch[1] as string) as number }),
     };
 
-    const redirectUrlHubCloud = $('a', el)
-      .filter((_i, el) => $(el).text().includes('HubCloud'))
+    // Links can be HubCloud, HubDrive, or via redirect bridge (gadgetsweb.xyz etc.)
+    const redirectUrlHubCloud = $('a', targetEl)
+      .filter((_i, el) => $(el).text().toLowerCase().includes('hubcloud'))
       .map((_i, el) => new URL($(el).attr('href') as string))
       .get(0);
 
@@ -161,12 +172,29 @@ export class FourKHDHub extends Source {
       return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubCloud), meta };
     }
 
-    const redirectUrlHubDrive = $('a', el)
-      .filter((_i, el) => $(el).text().includes('HubDrive'))
+    const redirectUrlHubDrive = $('a', targetEl)
+      .filter((_i, el) => $(el).text().toLowerCase().includes('hubdrive'))
       .map((_i, el) => new URL($(el).attr('href') as string))
-      .get(0) as URL;
+      .get(0);
 
-    return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubDrive), meta };
+    if (redirectUrlHubDrive) {
+      return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubDrive), meta };
+    }
+
+    // Fallback: take any external download link
+    const anyLink = $('a[href]', targetEl)
+      .filter((_i, el) => {
+        const href = $(el).attr('href') ?? '';
+        return href.startsWith('http') && !href.includes('4khdhub');
+      })
+      .map((_i, el) => new URL($(el).attr('href') as string))
+      .get(0) as URL | undefined;
+
+    if (!anyLink) {
+      throw new Error('No download link found in 4KHDHub download item');
+    }
+
+    return { url: await resolveRedirectUrl(ctx, this.fetcher, anyLink), meta };
   };
 
   private readonly getBaseUrl = async (ctx: Context): Promise<URL> => {
