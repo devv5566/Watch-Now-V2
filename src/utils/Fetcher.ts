@@ -234,6 +234,12 @@ export class Fetcher {
     const triggeredCloudflareTurnstile = 'cf-turnstile' in response.headers;
 
     if (response.status && response.status >= 200 && response.status <= 399 && !triggeredCloudflareTurnstile) {
+      const setCookie = response.headers['set-cookie'];
+      if (setCookie) {
+        (Array.isArray(setCookie) ? setCookie : [setCookie]).forEach(c => {
+          this.cookieJar.setCookieSync(c, url.href);
+        });
+      }
       return response;
     }
 

@@ -30,7 +30,7 @@ export const resolveRedirectUrl = async (ctx: Context, fetcher: Fetcher, url: UR
     if (tokenMatch && tokenMatch[1]) {
       const nextUrl = new URL(tokenMatch[1], url);
       const finalHtml = await fetcher.text(ctx, nextUrl, { headers: { Referer: url.href } });
-      return extractFinalLink(ctx, finalHtml, nextUrl.href);
+      return await extractFinalLink(ctx, fetcher, finalHtml, nextUrl.href);
     }
 
     // Check for form submission pattern (common in UnblockedGames)
@@ -59,7 +59,7 @@ export const resolveRedirectUrl = async (ctx: Context, fetcher: Fetcher, url: UR
     }
 
     // If it's already the final page with links
-    return extractFinalLink(ctx, redirectHtml, url.href);
+    return await extractFinalLink(ctx, fetcher, redirectHtml, url.href);
   }
 
   return url;
@@ -71,7 +71,7 @@ const handleLandingPage = async (ctx: Context, fetcher: Fetcher, html: string, c
     if (tokenMatch && tokenMatch[1]) {
       const nextUrl = new URL(tokenMatch[1], currentUrl);
       const finalHtml = await fetcher.text(ctx, nextUrl, { headers: { Referer: currentUrl.href } });
-      return extractFinalLink(ctx, finalHtml, nextUrl.href);
+      return await extractFinalLink(ctx, fetcher, finalHtml, nextUrl.href);
     }
     
     // Check if it's another form (recursive)
@@ -79,23 +79,56 @@ const handleLandingPage = async (ctx: Context, fetcher: Fetcher, html: string, c
         // ... (this could be simplified by making resolveRedirectUrl take optional html)
     }
 
-    return extractFinalLink(ctx, html, currentUrl.href);
+    return await extractFinalLink(ctx, fetcher, html, currentUrl.href);
 }
 
-const extractFinalLink = (_ctx: Context, html: string, referer: string): URL => {
-  // Extract the direct download link (R2 or direct server)
+const extractFinalLink = async (ctx: Context, fetcher: Fetcher, html: string, referer: string): Promise<URL> => {
+  // Pattern 1: Direct CDN Links (R2, PixelServer)
   const finalLinkMatch = html.match(/href="(https:\/\/pub-.*?\.r2\.dev\/.*?)"/) || 
-                       html.match(/href="(https:\/\/pixel\.hubcdn\.fans\/.*?)"/) ||
-                       html.match(/href="(https:\/\/hubcloud\.ink\/drive\/.*?)"/);
+                       html.match(/href="(https:\/\/pixel\.hubcdn\.fans\/.*?)"/);
   
   if (finalLinkMatch && finalLinkMatch[1]) {
     return new URL(finalLinkMatch[1]);
   }
+
+  // Pattern 2: HubCloud Drive / Instant Download (Requires POST to /api with x-token)
+  const driveMatch = html.match(/href="(https:\/\/hubcloud\.ink\/drive\/.*?)"/) ||
+                    html.match(/href="(https?:\/\/.*?\/drive\/.*?)"/);
   
-  // Fallback: search for any "Direct Download" or "Instant Download" button
+  if (driveMatch && driveMatch[1]) {
+    const driveUrl = new URL(driveMatch[1]);
+    const key = driveUrl.searchParams.get('id');
+    if (key) {
+      try {
+        const apiUrl = new URL('/api', driveUrl.origin);
+        const apiResponse = await fetcher.textPost(ctx, apiUrl, JSON.stringify({ keys: key }), {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-token': driveUrl.hostname,
+            'Referer': driveUrl.href,
+          },
+        });
+        const apiData = JSON.parse(apiResponse) as { url: string };
+        if (apiData.url) {
+          return new URL(apiData.url);
+        }
+      } catch (e) {
+        console.warn(`Failed to resolve HubCloud Drive API for ${driveUrl}: ${e}`);
+      }
+    }
+    // Fallback to the drive page itself if API fails
+    return driveUrl;
+  }
+  
+  // Fallback: search for any "Direct Download" or "Instant Download" button text
   const directMatch = html.match(/href="(https?:\/\/.*?)"[^>]*>(Direct|Instant|HubCloud) Download/i);
   if (directMatch && directMatch[1]) {
-    return new URL(directMatch[1]);
+    const nextUrl = new URL(directMatch[1]);
+    // If the button points to another landing page, resolve it recursively
+    if (REDIRECT_HOSTS.some(host => nextUrl.hostname.includes(host))) {
+        return await resolveRedirectUrl(ctx, fetcher, nextUrl);
+    }
+    return nextUrl;
   }
 
   return new URL(referer);
