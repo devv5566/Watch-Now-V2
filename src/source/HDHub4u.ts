@@ -1,3 +1,4 @@
+import bytes from 'bytes';
 import * as cheerio from 'cheerio';
 import { ContentType } from 'stremio-addon-sdk';
 import { Context, CountryCode, Meta } from '../types';
@@ -96,7 +97,28 @@ export class HDHub4u extends Source {
     const $ = cheerio.load(html);
 
     return $('a[href*="hubdrive"]:not(:contains("⚡"))')
-      .map((_i, el) => ({ url: new URL($(el).attr('href') as string), meta }))
+      .map((_i, el) => {
+        const $link = $(el);
+        const url = new URL($link.attr('href') as string);
+        
+        // Find best title and metadata from context
+        const parentText = $link.parent().text().trim();
+        const prevHeaderText = $link.closest('h4, h3, h2, p').prevAll('h4, h3, h2').first().text().trim();
+        const linkText = $link.text().trim();
+        
+        const contextHtml = $link.closest('p, div, td').html() || '';
+        const sizeMatch = (contextHtml + ' ' + parentText).match(/([\d.]+ ?[GM]B)/i);
+        const resMatch = (contextHtml + ' ' + parentText + ' ' + prevHeaderText).match(/\d{3,4}p|4k|uhd/i);
+        
+        const height = resMatch ? (resMatch[0].toLowerCase().includes('4k') ? 2160 : parseInt(resMatch[0])) : undefined;
+        const bytesVal = sizeMatch ? bytes.parse(sizeMatch[1]) : undefined;
+
+        const title = [prevHeaderText, parentText, linkText]
+          .filter(t => t && t.length > 5)
+          .join(' - ') || 'HDHub4u Stream';
+
+        return { url, meta: { ...meta, title, height, bytes: bytesVal as number } };
+      })
       .toArray();
   };
 

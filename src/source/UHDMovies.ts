@@ -39,29 +39,34 @@ export class UHDMovies extends Source {
     const results: SourceResult[] = [];
 
     const downloadLinks = $('a[href*="cloud.unblockedgames.world"], a[href*="drive.seed"], a[href*="hubcloud"]')
-      .map((_i, el) => ({
-        url: new URL($(el).attr('href') as string),
-        text: $(el).text().trim(),
-        container: $(el).closest('p, div, blockquote'),
-      }))
+      .map((_i, el) => {
+        const $link = $(el);
+        const url = new URL($link.attr('href') as string);
+        const container = $link.closest('p, div, blockquote');
+        const localHtml = container.html() || '';
+        
+        // Find resolution in current link text or parent/prev headers
+        const linkText = $link.text().trim();
+        const resMatch = (linkText + ' ' + localHtml).match(/\d{3,4}p|4k|uhd/i);
+        const height = resMatch ? (resMatch[0].toLowerCase().includes('4k') ? 2160 : parseInt(resMatch[0])) : undefined;
+
+        // Find size
+        const sizeMatch = localHtml.match(/([\d.]+ ?[GM]B)/i);
+        const bytesVal = sizeMatch ? bytes.parse(sizeMatch[1]) : undefined;
+
+        // Find descriptive title
+        const prevHeader = container.prevAll('h1, h2, h3, h4, p').filter((_i, p) => $(p).text().length > 10).first().text().trim();
+        const title = [prevHeader, linkText].filter(t => t && t.length > 3).join(' - ') || name;
+
+        return { url, meta: { ...meta, height, bytes: bytesVal as number, title } };
+      })
       .get();
 
     for (const link of downloadLinks) {
       try {
-        const localHtml = link.container.html() || '';
-        const sizeMatch = localHtml.match(/([\d.]+ ?[GM]B)/i);
-        const heightMatch = localHtml.match(/\d{3,}p/) as string[] | null;
-
-        const meta: Meta = {
-          countryCodes: [CountryCode.multi, ...findCountryCodes(localHtml)],
-          ...(heightMatch && heightMatch[0] && { height: parseInt(heightMatch[0]) }),
-          title: link.text || $('h1.entry-title').text().trim(),
-          ...(sizeMatch && { bytes: bytes.parse(sizeMatch[1] as string) as number }),
-        };
-
         const resolvedUrl = await resolveRedirectUrl(ctx, this.fetcher, link.url);
         if (resolvedUrl) {
-          results.push({ url: resolvedUrl, meta });
+          results.push({ url: resolvedUrl, meta: link.meta });
         }
       } catch (e) {
         console.warn(`[UHDMovies] Error resolving link ${link.url}: ${e}`);

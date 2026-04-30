@@ -51,6 +51,10 @@ export class HubCloud extends Extractor {
               height,
               title,
             },
+            requestHeaders: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Referer': url.href,
+            },
           };
         }).toArray(),
       ...$('a')
@@ -73,6 +77,10 @@ export class HubCloud extends Extractor {
               height,
               title,
             },
+            requestHeaders: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Referer': url.href,
+            },
           };
         }).toArray(),
       ...$('a')
@@ -94,7 +102,10 @@ export class HubCloud extends Extractor {
               height,
               title,
             },
-            requestHeaders: { Referer: userUrl.href },
+            requestHeaders: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Referer': userUrl.href,
+            },
           };
         }).toArray(),
     ]);

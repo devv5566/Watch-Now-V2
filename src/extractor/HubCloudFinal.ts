@@ -8,7 +8,10 @@ export class HubCloudFinal extends Extractor {
 
   public supports(_ctx: Context, url: URL): boolean {
     const host = url.hostname.toLowerCase();
-    return host.includes('hubcdn.fans') || host.includes('r2.dev') || host.includes('hubdrive');
+    const path = url.pathname.toLowerCase();
+    return host.includes('hubcdn.fans') || 
+           host.includes('r2.dev') || 
+           ((host.includes('hubcloud') || host.includes('hubdrive')) && (path.includes('/api/file/') || path.includes('/download')));
   }
 
   protected async extractInternal(_ctx: Context, url: URL, meta: Meta): Promise<InternalUrlResult[]> {
