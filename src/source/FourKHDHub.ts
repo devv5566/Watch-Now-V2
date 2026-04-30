@@ -64,14 +64,14 @@ export class FourKHDHub extends Source {
               })
               .get(0),
           })).filter((_i, { downloadItem }) => downloadItem !== undefined)
-          .map(async (_id, { countryCodes, downloadItem }) => await this.extractSourceResults(ctx, $, downloadItem as BasicAcceptedElems<AnyNode>, countryCodes))
+          .map(async (_id, { countryCodes, downloadItem }) => await this.extractSourceResults(ctx, $, downloadItem as BasicAcceptedElems<AnyNode>, countryCodes, pageUrl))
           .toArray(),
       );
     }
 
     return Promise.all(
       $(`.download-item`)
-        .map(async (_i, el) => await this.extractSourceResults(ctx, $, el, [CountryCode.multi, ...findCountryCodes($(el).html() as string)]))
+        .map(async (_i, el) => await this.extractSourceResults(ctx, $, el, [CountryCode.multi, ...findCountryCodes($(el).html() as string)], pageUrl))
         .toArray(),
     );
   };
@@ -139,7 +139,7 @@ export class FourKHDHub extends Source {
     }
   };
 
-  private readonly extractSourceResults = async (ctx: Context, $: CheerioAPI, el: BasicAcceptedElems<AnyNode>, countryCodes: CountryCode[]): Promise<SourceResult> => {
+  private readonly extractSourceResults = async (ctx: Context, $: CheerioAPI, el: BasicAcceptedElems<AnyNode>, countryCodes: CountryCode[], pageUrl: URL): Promise<SourceResult> => {
     // The hidden content panel is in the sibling div with id="content-{data-file-id}"
     const fileId = $('.download-header', el).attr('data-file-id');
     const contentEl = fileId ? $(`#content-${fileId}`) : $(el);
