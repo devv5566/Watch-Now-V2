@@ -9,6 +9,7 @@ import { FileLions } from './FileLions';
 import { FileMoon } from './FileMoon';
 import { Fsst } from './Fsst';
 import { HubCloud } from './HubCloud';
+import { HubCloudFinal } from './HubCloudFinal';
 import { HubDrive } from './HubDrive';
 import { KinoGer } from './KinoGer';
 import { LuluStream } from './LuluStream';
@@ -37,6 +38,7 @@ export const createExtractors = (fetcher: Fetcher): Extractor[] => {
     // HubCloud/HubDrive MUST come before Direct, otherwise Direct's catch-all
     // supports() swallows hubcloud URLs before HubCloud extractor can handle them.
     hubCloud,
+    new HubCloudFinal(fetcher),
     new HubDrive(fetcher, hubCloud),
     new Direct(fetcher),
     new DoodStream(fetcher),

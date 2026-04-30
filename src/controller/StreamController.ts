@@ -42,7 +42,7 @@ export class StreamController {
 
     const ctx = contextFromRequestAndResponse(req, res);
 
-    this.logger.info(`Search stream for type "${type}" and id "${rawId}" for ip ${ctx.ip}`, ctx);
+    this.logger.info(`Search stream for type "${type}" and id "${rawId}" for ip ${ctx.ip}. Config: ${JSON.stringify(ctx.config)}`, ctx);
 
     const sources = this.sources.filter(source => source.countryCodes.filter(countryCode => countryCode in ctx.config).length);
 

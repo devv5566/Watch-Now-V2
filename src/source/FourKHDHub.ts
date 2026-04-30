@@ -51,11 +51,17 @@ export class FourKHDHub extends Source {
     if (tmdbId.season) {
       return Promise.all(
         $(`.episode-item`)
-          .filter((_i, el) => $('.episode-title', el).text().includes(`S${String(tmdbId.season).padStart(2, '0')}`))
+          .filter((_i, el) => {
+            const title = $('.episode-title', el).text();
+            return title.includes(`S${String(tmdbId.season).padStart(2, '0')}`) || title.includes(`Season ${tmdbId.season}`);
+          })
           .map((_i, el) => ({
             countryCodes: [CountryCode.multi, ...findCountryCodes($(el).html() as string)],
             downloadItem: $('.episode-download-item', el)
-              .filter((_i, el) => $(el).text().includes(`Episode-${String(tmdbId.episode).padStart(2, '0')}`))
+              .filter((_i, el) => {
+                const text = $(el).text();
+                return text.includes(`Episode-${String(tmdbId.episode).padStart(2, '0')}`) || text.includes(`Episode ${tmdbId.episode}`);
+              })
               .get(0),
           })).filter((_i, { downloadItem }) => downloadItem !== undefined)
           .map(async (_id, { countryCodes, downloadItem }) => await this.extractSourceResults(ctx, $, downloadItem as BasicAcceptedElems<AnyNode>, countryCodes))
@@ -126,6 +132,10 @@ export class FourKHDHub extends Source {
       // If we didn't find a good match with strict criteria, try first result of any format
       if (!results) {
         return $('a.movie-card')
+          .filter((_i, el) => {
+              const formats = $('.movie-card-formats', el).text().replace(/\s+/g, ' ').toLowerCase();
+              return tmdbId.season ? formats.includes('series') : (formats.includes('movies') || formats.includes('movie'));
+          })
           .map(async (_i, el) => {
             const href = $(el).attr('href');
             if (!href) {

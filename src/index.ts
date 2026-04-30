@@ -78,6 +78,7 @@ addon.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Cache-Control', 'public, max-age=10, immutable');
   }
 
+  logger.info(`${req.method} ${req.url}`);
   next();
 });
 
