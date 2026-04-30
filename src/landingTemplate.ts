@@ -23,6 +23,15 @@ export function landingTemplate(manifest: CustomManifest) {
             <span>${elem.title}</span>
           </label>
         </div>`;
+      } else if (elem.type === 'text') {
+        formFields += `
+        <div class="field-group text-group" style="margin-bottom: 12px;">
+          <label class="text-label" for="${key}" style="display: block; font-size: 0.8rem; color: var(--blue-light); margin-bottom: 6px; font-weight: 600;">
+            ${elem.title}
+          </label>
+          <input type="text" id="${key}" name="${key}" value="${elem.default || ''}" placeholder="Enter your token here..." 
+            style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text); font-family: inherit; font-size: 0.9rem;"/>
+        </div>`;
       }
     });
 

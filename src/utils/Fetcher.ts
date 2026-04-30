@@ -135,7 +135,21 @@ export class Fetcher {
   }
 
   protected async fetchWithTimeout(ctx: Context, url: URL, requestConfig?: CustomRequestConfig, tryCount = 0): Promise<AxiosResponse> {
-    const proxyUrl = this.getProxyForUrl(ctx, url);
+    const scrapeDoToken = ctx.config.scrapeDoToken || envGet('SCRAPEDO_TOKEN');
+    const challengingHosts = ['unblockedgames.world', 'hubcloud.ink', 'moviesdrive.in', 'moviesmod.com', 'moviesmod.net'];
+    const isChallenging = challengingHosts.some(host => url.hostname.includes(host));
+
+    let finalUrl = url;
+    if (scrapeDoToken && isChallenging && !requestConfig?.method?.includes('POST')) {
+        const scrapeDoUrl = new URL('https://api.scrape.do');
+        scrapeDoUrl.searchParams.append('token', scrapeDoToken);
+        scrapeDoUrl.searchParams.append('url', url.href);
+        // We only use GET for Scrape.do proxy currently as it's the simplest gateway
+        finalUrl = scrapeDoUrl;
+        this.logger.info(`Routing ${url.host} via Scrape.do`, ctx);
+    }
+
+    const proxyUrl = finalUrl === url ? this.getProxyForUrl(ctx, url) : undefined;
 
     let message = `Fetch ${requestConfig?.method ?? 'GET'} ${url}`;
     /* istanbul ignore if */
@@ -170,9 +184,9 @@ export class Fetcher {
 
     let response;
     try {
-      const finalUrl = new URL(url.href);
-      finalUrl.username = '';
-      finalUrl.password = '';
+      const axiosUrl = new URL(finalUrl.href);
+      axiosUrl.username = '';
+      axiosUrl.password = '';
 
       const cookieString = this.cookieJar.getCookieStringSync(url.href);
 

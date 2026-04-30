@@ -69,6 +69,13 @@ export const buildManifest = (sources: Source[], extractors: Extractor[], config
 
   // No additional config — language checkboxes only
 
+  manifest.config.push({
+    key: 'scrapeDoToken',
+    type: 'text',
+    title: 'Scrape.do API Token (Optional)',
+    default: config.scrapeDoToken || '',
+  });
+
   manifest.description += `\n\nSupported languages: ${languages.filter(language => language !== 'Multi').join(', ')}`;
   manifest.description += `\n\nSupported sources: ${sources.map(source => source.label).join(', ')}`;
   manifest.description += `\n\nSupported extractors: ${extractors.map(extractor => extractor.label).join(', ')}`;
