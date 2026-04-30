@@ -126,16 +126,20 @@ export class HDHub4u extends Source {
     const searchUrl = new URL(`/collections/post/documents/search?query_by=imdb_id&q=${encodeURIComponent(imdbId.id)}`, this.searchUrl);
     const searchResponse = await this.fetcher.json(ctx, searchUrl, { headers: { Referer: this.baseUrl } }) as SearchResponsePartial;
 
-    return searchResponse.hits
-      .filter(hit =>
-        hit.document.imdb_id === imdbId.id
+    console.info(`[HDHub4u] Search for ${imdbId.id} returned ${searchResponse.hits?.length || 0} hits`);
+
+    return (searchResponse.hits || [])
+      .filter(hit => {
+        const match = hit.document.imdb_id === imdbId.id
         && (
           !imdbId.season
           || hit.document.post_title.includes(`Season ${imdbId.season}`)
           || hit.document.post_title.includes(`S${String(imdbId.season)}`)
           || hit.document.post_title.includes(`S${String(imdbId.season).padStart(2, '0')}`)
-        ),
-      )
+        );
+        if (match) console.info(`[HDHub4u] Found matching page: ${hit.document.permalink}`);
+        return match;
+      })
       .map(hit => new URL(hit.document.permalink, this.baseUrl));
   };
 }

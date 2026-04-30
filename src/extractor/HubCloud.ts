@@ -64,10 +64,10 @@ export class HubCloud extends Extractor {
           return text.includes('FSLv2');
         })
         .map((_i, el) => {
-          const url = new URL($(el).attr('href') as string);
+          const streamUrl = new URL($(el).attr('href') as string);
           return {
-            url,
-            format: Format.mp4, // FSLv2 also serves video files
+            url: streamUrl,
+            format: Format.mp4,
             label: `${this.label} (FSLv2)`,
             meta: {
               ...meta,
@@ -87,11 +87,11 @@ export class HubCloud extends Extractor {
         .filter((_i, el) => $(el).text().includes('PixelServer'))
         .map((_i, el) => {
           const userUrl = new URL(($(el).attr('href') as string).replace('/api/file/', '/u/'));
-          const url = new URL(userUrl.href.replace('/u/', '/api/file/'));
-          url.searchParams.set('download', '');
+          const streamUrl = new URL(userUrl.href.replace('/u/', '/api/file/'));
+          streamUrl.searchParams.set('download', '');
 
           return {
-            url,
+            url: streamUrl,
             format: Format.unknown,
             label: `${this.label} (PixelServer)`,
             meta: {
