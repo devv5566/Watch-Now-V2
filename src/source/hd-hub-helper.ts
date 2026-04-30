@@ -101,13 +101,18 @@ const extractFinalLink = async (ctx: Context, fetcher: Fetcher, html: string, re
     if (key) {
       try {
         const apiUrl = new URL('/api', driveUrl.origin);
-        const apiResponse = await fetcher.textPost(ctx, apiUrl, JSON.stringify({ keys: key }), {
+        const params = new URLSearchParams();
+        params.append('keys', key);
+        
+        const apiResponse = await fetcher.textPost(ctx, apiUrl, params.toString(), {
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'x-token': driveUrl.hostname,
+            'x-requested-with': 'XMLHttpRequest',
             'Referer': driveUrl.href,
           },
         });
+        
         const apiData = JSON.parse(apiResponse) as { url: string };
         if (apiData.url) {
           return new URL(apiData.url);
