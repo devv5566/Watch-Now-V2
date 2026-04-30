@@ -165,7 +165,7 @@ export class FourKHDHub extends Source {
       .get(0);
 
     if (redirectUrlHubCloud) {
-      return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubCloud), meta };
+      return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubCloud), meta: { ...meta, referer: pageUrl.href } };
     }
 
     const redirectUrlHubDrive = $('a', targetEl)
@@ -174,7 +174,7 @@ export class FourKHDHub extends Source {
       .get(0);
 
     if (redirectUrlHubDrive) {
-      return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubDrive), meta };
+      return { url: await resolveRedirectUrl(ctx, this.fetcher, redirectUrlHubDrive), meta: { ...meta, referer: pageUrl.href } };
     }
 
     // Fallback: take any external download link
@@ -190,7 +190,7 @@ export class FourKHDHub extends Source {
       throw new Error('No download link found in 4KHDHub download item');
     }
 
-    return { url: await resolveRedirectUrl(ctx, this.fetcher, anyLink), meta };
+    return { url: await resolveRedirectUrl(ctx, this.fetcher, anyLink), meta: { ...meta, referer: pageUrl.href } };
   };
 
   private readonly getBaseUrl = async (ctx: Context): Promise<URL> => {

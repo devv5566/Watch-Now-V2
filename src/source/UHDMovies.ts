@@ -63,7 +63,7 @@ export class UHDMovies extends Source {
 
         console.info(`[UHDMovies] Extracted link: ${url.href} (${title})`);
 
-        return { url, meta: { countryCodes: [CountryCode.multi, ...findCountryCodes(localHtml)], height, bytes: bytesVal as number, title } };
+        return { url, meta: { countryCodes: [CountryCode.multi, ...findCountryCodes(localHtml)], height, bytes: bytesVal as number, title, referer: pageUrl.href } };
       })
       .get();
 
