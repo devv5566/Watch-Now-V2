@@ -85,73 +85,54 @@ export class FourKHDHub extends Source {
 
       const $ = cheerio.load(html);
 
-      // New site structure: `a.movie-card` wraps entire card
-      // Title is in `.movie-card-content` (h3/p), year is a <p> inside, format badges are in `.movie-card-formats`
-      const results = $('a.movie-card')
-        .filter((_i, el) => {
-          // Format filter: check if Movies or Series text appears anywhere in the card
-          const formats = $('.movie-card-formats', el).text().replace(/\s+/g, ' ').toLowerCase();
-          const hasCorrectFormat = tmdbId.season
-            ? formats.includes('series')
-            : formats.includes('movies') || formats.includes('movie') || !formats.includes('series');
-          if (!hasCorrectFormat) return false;
-
-          // Year: typically the last short text inside .movie-card-content
-          const yearText = $('.movie-card-content p', el).last().text().trim();
-          const movieCardYear = parseInt(yearText);
-
-          // Be more lenient with year matching (±2 years)
-          return Math.abs(movieCardYear - year) <= 2;
-        })
-        .filter((_i, el) => {
-          // Title is in h3 or the main text of .movie-card-content
-          const movieCardTitle = ($('.movie-card-content h3', el).text()
-            || $('.movie-card-content', el).clone().children('p').remove().end().text())
+      const candidates = $('a.movie-card')
+        .map((_i, el) => {
+          const $el = $(el);
+          const title = ($('.movie-card-content h3', $el).text()
+            || $('.movie-card-content', $el).clone().children('p').remove().end().text())
             .replace(/\[.*?]/g, '')
             .trim();
-
-          if (!movieCardTitle) return false;
-
-          const diff = levenshtein.get(movieCardTitle, name, { useCollator: true });
-
-          return diff < 8
-            || (movieCardTitle.toLowerCase().includes(name.toLowerCase()) && diff < 20);
+          const href = $el.attr('href');
+          const yearText = $('.movie-card-content p', $el).last().text().trim();
+          const cardYear = parseInt(yearText) || 0;
+          const formats = $('.movie-card-formats', $el).text().toLowerCase();
+          
+          return { title, href, cardYear, formats };
         })
-        .map(async (_i, el) => {
-          const href = $(el).attr('href');
-          if (!href) return undefined;
-          try {
-            return new URL(href, await this.getBaseUrl(ctx));
-          } catch (e) {
-            console.warn(`Invalid URL in 4KHDHub search result: ${href}`, ctx);
-            return undefined;
-          }
-        })
-        .get(0);
+        .get();
 
-      // If we didn't find a good match with strict criteria, try first result of any format
-      if (!results) {
-        return $('a.movie-card')
-          .filter((_i, el) => {
-              const formats = $('.movie-card-formats', el).text().replace(/\s+/g, ' ').toLowerCase();
-              return tmdbId.season ? formats.includes('series') : (formats.includes('movies') || formats.includes('movie'));
-          })
-          .map(async (_i, el) => {
-            const href = $(el).attr('href');
-            if (!href) {
-              return undefined;
-            }
-            try {
-              return new URL(href, await this.getBaseUrl(ctx));
-            } catch (e) {
-              console.warn(`Invalid URL in 4KHDHub search result (fallback): ${href}`, ctx);
-              return undefined;
-            }
-          })
-          .get(0);
+      const scored = candidates
+        .filter(c => {
+          const hasCorrectFormat = tmdbId.season
+            ? c.formats.includes('series')
+            : c.formats.includes('movies') || c.formats.includes('movie') || !c.formats.includes('series');
+          return hasCorrectFormat && c.href && c.title;
+        })
+        .map(c => {
+          const yearScore = Math.abs(c.cardYear - year) <= 1 ? 0 : (Math.abs(c.cardYear - year) <= 2 ? 5 : 20);
+          const diff = levenshtein.get(c.title.toLowerCase(), name.toLowerCase());
+          return { ...c, score: diff + yearScore };
+        })
+        .sort((a, b) => a.score - b.score);
+
+      const bestMatch = scored[0];
+      // Threshold 10 for high accuracy
+      if (bestMatch && bestMatch.score < 10) {
+        return new URL(bestMatch.href as string, await this.getBaseUrl(ctx));
       }
 
-      return results;
+      // Fallback: Subset match
+      const subsetMatch = scored.find(c => {
+          const cleanTitle = c.title.toLowerCase();
+          const cleanName = name.toLowerCase();
+          return cleanTitle.includes(cleanName) && Math.abs(c.cardYear - year) <= 1;
+      });
+
+      if (subsetMatch) {
+          return new URL(subsetMatch.href as string, await this.getBaseUrl(ctx));
+      }
+
+      return undefined;
     } catch (error) {
       console.warn(`Error in 4KHDHub fetchPageUrl: ${error}`, ctx);
       return undefined;
