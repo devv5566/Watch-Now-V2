@@ -29,7 +29,6 @@ export class UHDMovies extends Source {
     const tmdbId = await getTmdbId(ctx, this.fetcher, id);
 
     const pageUrl = await this.fetchPageUrl(ctx, tmdbId);
-    console.info(`[UHDMovies] Search result URL: ${pageUrl || 'None'}`);
     if (!pageUrl) {
       return [];
     }
@@ -61,9 +60,7 @@ export class UHDMovies extends Source {
         const prevHeader = container.prevAll('h1, h2, h3, h4, p').filter((_i, p) => $(p).text().length > 10).first().text().trim();
         const title = [prevHeader, linkText].filter(t => t && t.length > 3).join(' - ') || name;
 
-        console.info(`[UHDMovies] Extracted link: ${url.href} (${title})`);
-
-        return { url, meta: { countryCodes: [CountryCode.multi, ...findCountryCodes(localHtml)], height, bytes: bytesVal as number, title, referer: pageUrl.href } };
+        return { url, meta: { countryCodes: [CountryCode.multi, ...findCountryCodes(localHtml)], height, bytes: bytesVal as number, title } };
       })
       .get();
 
