@@ -40,7 +40,7 @@ export class UHDMovies extends Source {
 
     const [name] = await getTmdbNameAndYear(ctx, this.fetcher, tmdbId);
 
-    const downloadLinks = $('a[href*="cloud.unblockedgames.world"], a[href*="drive.seed"], a[href*="hubcloud"]')
+    const downloadLinks = $('a[href*="cloud.unblockedgames.world"], a[href*="drive.seed"], a[href*="hubcloud"], a[href*="moviesdrive.in"]')
       .map((_i, el) => {
         const $link = $(el);
         const url = new URL($link.attr('href') as string);

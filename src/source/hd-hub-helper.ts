@@ -3,7 +3,7 @@ import rot13Cipher from 'rot13-cipher';
 import { Context } from '../types';
 import { Fetcher } from '../utils';
 
-const REDIRECT_HOSTS = ['gadgetsweb.xyz', 'v-cloud.link', 'vgdrive.pro', 'nexdrive.blog', 'hubcloud.club', 'hubcloud.org', 'hubcloud.foo', 'hubcloud.ink'];
+const REDIRECT_HOSTS = ['gadgetsweb.xyz', 'v-cloud.link', 'vgdrive.pro', 'nexdrive.blog', 'hubcloud.club', 'hubcloud.org', 'hubcloud.foo', 'hubcloud.ink', 'unblockedgames.world', 'moviesdrive.in'];
 
 export const resolveRedirectUrl = async (ctx: Context, fetcher: Fetcher, url: URL): Promise<URL> => {
   if (!REDIRECT_HOSTS.some(host => url.hostname.includes(host))) {
@@ -85,14 +85,15 @@ const handleLandingPage = async (ctx: Context, fetcher: Fetcher, html: string, c
 const extractFinalLink = (_ctx: Context, html: string, referer: string): URL => {
   // Extract the direct download link (R2 or direct server)
   const finalLinkMatch = html.match(/href="(https:\/\/pub-.*?\.r2\.dev\/.*?)"/) || 
-                       html.match(/href="(https:\/\/pixel\.hubcdn\.fans\/.*?)"/);
+                       html.match(/href="(https:\/\/pixel\.hubcdn\.fans\/.*?)"/) ||
+                       html.match(/href="(https:\/\/hubcloud\.ink\/drive\/.*?)"/);
   
   if (finalLinkMatch && finalLinkMatch[1]) {
     return new URL(finalLinkMatch[1]);
   }
   
-  // Fallback: search for any "Direct Download" or similar button
-  const directMatch = html.match(/href="(https?:\/\/.*?)"[^>]*>Direct Download/i);
+  // Fallback: search for any "Direct Download" or "Instant Download" button
+  const directMatch = html.match(/href="(https?:\/\/.*?)"[^>]*>(Direct|Instant|HubCloud) Download/i);
   if (directMatch && directMatch[1]) {
     return new URL(directMatch[1]);
   }
