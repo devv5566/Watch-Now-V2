@@ -2,7 +2,7 @@ import bytes from 'bytes';
 import * as cheerio from 'cheerio';
 import levenshtein from 'fast-levenshtein';
 import { ContentType } from 'stremio-addon-sdk';
-import { Context, CountryCode, Meta } from '../types';
+import { Context, CountryCode } from '../types';
 import { Fetcher, findCountryCodes, getTmdbId, getTmdbNameAndYear, Id, TmdbId } from '../utils';
 import { resolveRedirectUrl } from './hd-hub-helper';
 import { Source, SourceResult } from './Source';
@@ -38,6 +38,8 @@ export class UHDMovies extends Source {
 
     const results: SourceResult[] = [];
 
+    const [name] = await getTmdbNameAndYear(ctx, this.fetcher, tmdbId);
+
     const downloadLinks = $('a[href*="cloud.unblockedgames.world"], a[href*="drive.seed"], a[href*="hubcloud"]')
       .map((_i, el) => {
         const $link = $(el);
@@ -52,13 +54,13 @@ export class UHDMovies extends Source {
 
         // Find size
         const sizeMatch = localHtml.match(/([\d.]+ ?[GM]B)/i);
-        const bytesVal = sizeMatch ? bytes.parse(sizeMatch[1]) : undefined;
+        const bytesVal = sizeMatch && sizeMatch[1] ? bytes.parse(sizeMatch[1]) : undefined;
 
         // Find descriptive title
         const prevHeader = container.prevAll('h1, h2, h3, h4, p').filter((_i, p) => $(p).text().length > 10).first().text().trim();
         const title = [prevHeader, linkText].filter(t => t && t.length > 3).join(' - ') || name;
 
-        return { url, meta: { ...meta, height, bytes: bytesVal as number, title } };
+        return { url, meta: { countryCodes: [CountryCode.multi, ...findCountryCodes(localHtml)], height, bytes: bytesVal as number, title } };
       })
       .get();
 

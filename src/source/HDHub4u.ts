@@ -111,7 +111,7 @@ export class HDHub4u extends Source {
         const resMatch = (contextHtml + ' ' + parentText + ' ' + prevHeaderText).match(/\d{3,4}p|4k|uhd/i);
         
         const height = resMatch ? (resMatch[0].toLowerCase().includes('4k') ? 2160 : parseInt(resMatch[0])) : undefined;
-        const bytesVal = sizeMatch ? bytes.parse(sizeMatch[1]) : undefined;
+        const bytesVal = sizeMatch && sizeMatch[1] ? bytes.parse(sizeMatch[1]) : undefined;
 
         const title = [prevHeaderText, parentText, linkText]
           .filter(t => t && t.length > 5)
