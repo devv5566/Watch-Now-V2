@@ -136,32 +136,7 @@ export class Fetcher {
 
   protected async fetchWithTimeout(ctx: Context, url: URL, requestConfig?: CustomRequestConfig, tryCount = 0): Promise<AxiosResponse> {
     const scrapeDoToken = ctx.config.scrapeDoToken || envGet('SCRAPEDO_TOKEN');
-    const challengingHosts = [
-      'unblockedgames.world',
-      'hubcloud.ink',
-      'hubcloud.club',
-      'hubcloud.org',
-      'hubcloud.foo',
-      'moviesdrive.in',
-      'moviesdrives.my',
-      'moviesmod.com',
-      'moviesmod.net',
-      'hdhub4u.fo',
-      'pingora.fyi',
-      'uhdmovies.pink',
-      '4khdhub.click',
-      'gadgetsweb.xyz',
-      'gadgetsweb.net',
-      'v-cloud.link',
-      'vgdrive.pro',
-      'nexdrive.blog',
-      'mdrive.lol',
-      'hubdrive.space',
-      'hubdrive.me',
-      'katdrive.cc',
-      'gdflix.online',
-      'gdflix.net',
-    ];
+    const challengingHosts = ['unblockedgames.world', 'hubcloud.ink', 'moviesdrive.in', 'moviesmod.com', 'moviesmod.net'];
     const isChallenging = challengingHosts.some(host => url.hostname.includes(host));
 
     let finalUrl = url;
