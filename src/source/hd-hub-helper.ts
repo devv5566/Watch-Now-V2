@@ -3,7 +3,21 @@ import rot13Cipher from 'rot13-cipher';
 import { Context } from '../types';
 import { Fetcher } from '../utils';
 
-const REDIRECT_HOSTS = ['gadgetsweb.xyz', 'v-cloud.link', 'vgdrive.pro', 'nexdrive.blog', 'hubcloud.club', 'hubcloud.org', 'hubcloud.foo', 'hubcloud.ink', 'unblockedgames.world', 'moviesdrive.in'];
+const REDIRECT_HOSTS = [
+  'gadgetsweb.xyz',
+  'gadgetsweb.net',
+  'v-cloud.link',
+  'vgdrive.pro',
+  'nexdrive.blog',
+  'hubcloud.club',
+  'hubcloud.org',
+  'hubcloud.foo',
+  'hubcloud.ink',
+  'unblockedgames.world',
+  'moviesdrive.in',
+  'hubdrive.space',
+  'hubdrive.me'
+];
 
 export const resolveRedirectUrl = async (ctx: Context, fetcher: Fetcher, url: URL): Promise<URL> => {
   if (!REDIRECT_HOSTS.some(host => url.hostname.includes(host))) {
