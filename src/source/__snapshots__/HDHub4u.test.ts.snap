@@ -4,21 +4,27 @@ exports[`HDHub4u handle stranger things s05e01 1`] = `
 [
   {
     "meta": {
+      "bytes": undefined,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": undefined,
+      "title": "Drive | Instant |",
     },
     "url": "https://hubdrive.space/file/2452204677",
   },
   {
     "meta": {
+      "bytes": undefined,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 1080,
+      "title": "720p – Drive | Instant | WATCH - 1080p – Drive | Instant",
     },
     "url": "https://hubdrive.space/file/1788432714",
   },
@@ -29,89 +35,113 @@ exports[`HDHub4u handle stranger things s05e08 1`] = `
 [
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "Stranger Things S05 E08 [FINAL EP] - 480p – Drive | Direct",
     },
     "url": "https://hubdrive.space/file/1793632174",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "720p 10Bit HEVC – Drive | Direct",
     },
     "url": "https://hubdrive.space/file/2655940410",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "480p – Drive | Direct - 720p – Drive | Instant | Direct",
     },
     "url": "https://hubdrive.space/file/2007803192",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "1080p 10Bit HEVC – Drive | Direct",
     },
     "url": "https://hubdrive.space/file/2913823672",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "720p – Drive | Instant | Direct - 1080p – Drive | Instant | Direct",
     },
     "url": "https://hubdrive.space/file/1898122266",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "1080p WEB-DL [5.5GB] - 1080p WEB-DL [5.5GB]",
     },
     "url": "https://hubdrive.space/file/3043520687",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "1080p MULTi WEB-DL [6.7GB] - 1080p MULTi WEB-DL [6.7GB]",
     },
     "url": "https://hubdrive.space/file/4664307676",
   },
   {
     "meta": {
+      "bytes": 5905580032,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 480,
       "referer": "https://hblinks.dad/archives/102319",
+      "title": "4K/2160p SDR MULTi WEB-DL – 16.3GB - 4K/2160p SDR MULTi WEB-DL – 16.3GB",
     },
     "url": "https://hubdrive.space/file/8835271729",
   },
@@ -122,85 +152,109 @@ exports[`HDHub4u handle superman 2025 1`] = `
 [
   {
     "meta": {
+      "bytes": 503316480,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 2160,
+      "title": "480p⚡[480MB] - 720p HEVC [800MB] - 720p HEVC [800MB]",
     },
     "url": "https://hubdrive.space/file/2048323831",
   },
   {
     "meta": {
+      "bytes": 503316480,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 2160,
+      "title": "720p x264 [1.2GB] - 1080p HEVC [1.8GB] - 1080p HEVC [1.8GB]",
     },
     "url": "https://hubdrive.space/file/1931317982",
   },
   {
     "meta": {
+      "bytes": 503316480,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 2160,
+      "title": "1080p x264 [2.8GB] - 1080p MULTi WEB-DL [9.6GB] - 1080p MULTi WEB-DL [9.6GB]",
     },
     "url": "https://hubdrive.space/file/7875454809",
   },
   {
     "meta": {
+      "bytes": 503316480,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": 2160,
+      "title": "1080p MULTi WEB-DL [9.6GB] - 4K [2160p SDR MULTi WEB-DL – 24.8GB] - 4K [2160p SDR MULTi WEB-DL – 24.8GB]",
     },
     "url": "https://hubdrive.space/file/3608508909",
   },
   {
     "meta": {
+      "bytes": undefined,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": undefined,
       "referer": "https://hblinks.dad/archives/95885",
+      "title": "HDHub4u Stream",
     },
     "url": "https://hubdrive.space/file/2171324800",
   },
   {
     "meta": {
+      "bytes": undefined,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": undefined,
       "referer": "https://hblinks.dad/archives/95884",
+      "title": "HDHub4u Stream",
     },
     "url": "https://hubdrive.space/file/1866728891",
   },
   {
     "meta": {
+      "bytes": undefined,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": undefined,
       "referer": "https://hblinks.dad/archives/95883",
+      "title": "HDHub4u Stream",
     },
     "url": "https://hubdrive.space/file/3938026297",
   },
   {
     "meta": {
+      "bytes": undefined,
       "countryCodes": [
         "multi",
         "en",
         "hi",
       ],
+      "height": undefined,
       "referer": "https://hblinks.dad/archives/95882",
+      "title": "HDHub4u Stream",
     },
     "url": "https://hubdrive.space/file/2823990434",
   },

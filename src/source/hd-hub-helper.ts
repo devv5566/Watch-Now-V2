@@ -16,7 +16,10 @@ const REDIRECT_HOSTS = [
   'unblockedgames.world',
   'moviesdrive.in',
   'hubdrive.space',
-  'hubdrive.me'
+  'hubdrive.me',
+  'katdrive.cc',
+  'gdflix.online',
+  'gdflix.net',
 ];
 
 export const resolveRedirectUrl = async (ctx: Context, fetcher: Fetcher, url: URL): Promise<URL> => {
